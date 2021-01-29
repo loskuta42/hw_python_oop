@@ -13,19 +13,20 @@ class Calculator:
         self.records.append(Record)
 
     def get_today_stats(self):
-        stat=0
+        stat = 0
         now = dt.datetime.now().date()
-        for i in range(0,len(self.records)):
+        for i in range(0, len(self.records)):
             if self.records[i].date == now:
                 stat+=self.records[i].amount
         return stat
 
     def get_week_stats(self):
-        week_stat=0
+        week_stat = 0
         start_week = dt.datetime.now().date() - dt.timedelta(days=7)
         now = dt.datetime.now().date()
-        for i in range(0,len(self.records)):
-            if (self.records[i].date > start_week) and (self.records[i].date <= now):
+        for i in range(0, len(self.records)):
+            date = self.records[i].date
+            if (date > start_week) and (date <= now):
                 week_stat += self.records[i].amount
         return week_stat
 
@@ -33,18 +34,20 @@ class Calculator:
 class CaloriesCalculator(Calculator):
     """Child class of class Calculator for count calories."""
     def get_calories_remained(self):
-        if Calculator.get_today_stats(self) < self.limit:
-            additive = self.limit - Calculator.get_today_stats(self)
-            return (f"Сегодня можно съесть что-нибудь ещё, но с общей калорийностью "
-            f"не более {additive} кКал")
-        elif Calculator.get_today_stats(self) >= self.limit:
-            return f"Хватит есть!"
+        stat_tmp = Calculator.get_today_stats(self)
+        if stat_tmp < self.limit:
+            additive = self.limit - stat_tmp
+            return (f"Сегодня можно съесть что-нибудь ещё, "
+                    f"но с общей калорийностью не более {additive} кКал")
+        elif stat_tmp >= self.limit:
+            return "Хватит есть!"
 
 
 class CashCalculator(Calculator):
     """Child class of class Calculator for count cash."""
     USD_RATE = 76.24
     EURO_RATE = 92.46
+
     def get_today_cash_remained(self, currency):
         if Calculator.get_today_stats(self) < self.limit:
             additive = self.limit - Calculator.get_today_stats(self)
@@ -60,7 +63,7 @@ class CashCalculator(Calculator):
                 return f"На сегодня осталось {r_eur_additive} Euro"
 
         elif Calculator.get_today_stats(self) == self.limit:
-            return f"Денег нет, держись"
+            return "Денег нет, держись"
 
         elif Calculator.get_today_stats(self) > self.limit:
             debt = Calculator.get_today_stats(self) - self.limit
@@ -76,14 +79,13 @@ class CashCalculator(Calculator):
                 return f"Денег нет, держись: твой долг - {r_eur_debt} Euro"
 
 
-
 class Record:
     """Class for records."""
     def __init__(self, amount, comment, date=None):
         self.amount = amount
         self.comment = comment
         self.date = date
-        if self.date == None:
+        if self.date is None:
             self.date = dt.datetime.now().date()
         else:
             self.date = dt.datetime.strptime(date, '%d.%m.%Y').date()
