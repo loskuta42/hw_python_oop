@@ -1,5 +1,6 @@
 import datetime as dt
 
+
 class Calculator:
     """Parent class which get only limit."""
     def __init__(self, limit):
