@@ -18,7 +18,7 @@ class Calculator:
         now = dt.datetime.now().date()
         for i in range(0, len(self.records)):
             if self.records[i].date == now:
-                stat+=self.records[i].amount
+                stat += self.records[i].amount
         return stat
 
     def get_week_stats(self):
