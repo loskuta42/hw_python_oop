@@ -3,6 +3,7 @@ import datetime as dt
 
 class Calculator:
     """Parent class which get only limit."""
+
     def __init__(self, limit):
         self.limit = limit
         self.records = []
@@ -34,6 +35,7 @@ class Calculator:
 
 class CaloriesCalculator(Calculator):
     """Child class of class Calculator for count calories."""
+
     def get_calories_remained(self):
         stat_tmp = Calculator.get_today_stats(self)
         if stat_tmp < self.limit:
@@ -56,6 +58,7 @@ class CashCalculator(Calculator):
         }
         rate = dict_curr[currency][0]
         curr_name = dict_curr[currency][1]
+
         if Calculator.get_today_stats(self) < self.limit:
             additive = self.limit - Calculator.get_today_stats(self)
             additive_r = round(additive / rate, 2)
@@ -72,25 +75,13 @@ class CashCalculator(Calculator):
 
 class Record:
     """Class for records."""
+
     def __init__(self, amount, comment, date=None):
         self.amount = amount
         self.comment = comment
         self.date = date
+
         if self.date is None:
             self.date = dt.datetime.now().date()
         else:
             self.date = dt.datetime.strptime(date, '%d.%m.%Y').date()
-
-
-cash_calculator = CashCalculator(1000)
-
-# дата в параметрах не указана,
-# так что по умолчанию к записи должна автоматически добавиться сегодняшняя дата
-cash_calculator.add_record(Record(amount=145, comment="кофе"))
-# и к этой записи тоже дата должна добавиться автоматически
-cash_calculator.add_record(Record(amount=300, comment="Серёге за обед"))
-# а тут пользователь указал дату, сохраняем её
-cash_calculator.add_record(Record(amount=3000, comment="бар в Танин др", date="08.11.2019"))
-
-print(cash_calculator.get_today_cash_remained("usd"))
-print(cash_calculator.get_today_cash_remained("eur"))
