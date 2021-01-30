@@ -14,22 +14,22 @@ class Calculator:
         self.records.append(Record)
 
     def get_today_stats(self):
-        stat = 0
+        stat = []
         now = dt.datetime.now().date()
-        for i in range(0, len(self.records)):
-            if self.records[i].date == now:
-                stat += self.records[i].amount
-        return stat
+        for i in self.records:
+            if i.date == now:
+                stat.append(i.amount)
+        return sum(stat)
 
     def get_week_stats(self):
-        week_stat = 0
+        week_stat = []
         start_week = dt.datetime.now().date() - dt.timedelta(days=7)
         now = dt.datetime.now().date()
-        for i in range(0, len(self.records)):
-            date = self.records[i].date
-            if (date > start_week) and (date <= now):
-                week_stat += self.records[i].amount
-        return week_stat
+        for i in self.records:
+            date = i.date
+            if date > start_week and date <= now:
+                week_stat.append(i.amount)
+        return sum(week_stat)
 
 
 class CaloriesCalculator(Calculator):
@@ -40,8 +40,7 @@ class CaloriesCalculator(Calculator):
             additive = self.limit - stat_tmp
             return (f"Сегодня можно съесть что-нибудь ещё, "
                     f"но с общей калорийностью не более {additive} кКал")
-        elif stat_tmp >= self.limit:
-            return "Хватит есть!"
+        return "Хватит есть!"
 
 
 class CashCalculator(Calculator):
@@ -50,34 +49,25 @@ class CashCalculator(Calculator):
     EURO_RATE = 92.46
 
     def get_today_cash_remained(self, currency):
+        dict_curr = {
+            "rub": [1.00, "руб"],
+            "usd": [self.USD_RATE, "USD"],
+            "eur": [self.EURO_RATE, "Euro"]
+        }
+        rate = dict_curr[currency][0]
+        curr_name = dict_curr[currency][1]
         if Calculator.get_today_stats(self) < self.limit:
             additive = self.limit - Calculator.get_today_stats(self)
-            if currency == "rub":
-                return f"На сегодня осталось {additive} руб"
-            elif currency == "usd":
-                usd_additive = float(additive)/self.USD_RATE
-                r_usd_additive = round(usd_additive, 2)
-                return f"На сегодня осталось {r_usd_additive} USD"
-            elif currency == "eur":
-                eur_additive = float(additive)/self.EURO_RATE
-                r_eur_additive = round(eur_additive, 2)
-                return f"На сегодня осталось {r_eur_additive} Euro"
+            additive_r = round(additive / rate, 2)
+            return f"На сегодня осталось {additive_r} {curr_name}"
 
         elif Calculator.get_today_stats(self) == self.limit:
             return "Денег нет, держись"
 
         elif Calculator.get_today_stats(self) > self.limit:
             debt = Calculator.get_today_stats(self) - self.limit
-            if currency == "rub":
-                return f"Денег нет, держись: твой долг - {debt} руб"
-            elif currency == "usd":
-                usd_debt = float(debt)/self.USD_RATE
-                r_usd_debt = round(usd_debt, 2)
-                return f"Денег нет, держись: твой долг - {r_usd_debt} USD"
-            elif currency == "eur":
-                eur_debt = float(debt)/self.EURO_RATE
-                r_eur_debt = round(eur_debt, 2)
-                return f"Денег нет, держись: твой долг - {r_eur_debt} Euro"
+            debt__r = round(debt / rate, 2)
+            return f"Денег нет, держись: твой долг - {debt__r} {curr_name}"
 
 
 class Record:
@@ -90,3 +80,17 @@ class Record:
             self.date = dt.datetime.now().date()
         else:
             self.date = dt.datetime.strptime(date, '%d.%m.%Y').date()
+
+
+cash_calculator = CashCalculator(1000)
+
+# дата в параметрах не указана,
+# так что по умолчанию к записи должна автоматически добавиться сегодняшняя дата
+cash_calculator.add_record(Record(amount=145, comment="кофе"))
+# и к этой записи тоже дата должна добавиться автоматически
+cash_calculator.add_record(Record(amount=300, comment="Серёге за обед"))
+# а тут пользователь указал дату, сохраняем её
+cash_calculator.add_record(Record(amount=3000, comment="бар в Танин др", date="08.11.2019"))
+
+print(cash_calculator.get_today_cash_remained("usd"))
+print(cash_calculator.get_today_cash_remained("eur"))
