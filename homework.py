@@ -15,22 +15,15 @@ class Calculator:
         self.records.append(Record)
 
     def get_today_stats(self):
-        stat = []
         now = dt.datetime.now().date()
-        for i in self.records:
-            if i.date == now:
-                stat.append(i.amount)
-        return sum(stat)
+        return sum(record.amount for record in self.records
+                   if record.date == now)
 
     def get_week_stats(self):
-        week_stat = []
         start_week = dt.datetime.now().date() - dt.timedelta(days=7)
         now = dt.datetime.now().date()
-        for i in self.records:
-            date = i.date
-            if date > start_week and date <= now:
-                week_stat.append(i.amount)
-        return sum(week_stat)
+        return sum(record.amount for record in self.records
+                   if now >= record.date > start_week)
 
 
 class CaloriesCalculator(Calculator):
@@ -56,8 +49,7 @@ class CashCalculator(Calculator):
             "usd": [self.USD_RATE, "USD"],
             "eur": [self.EURO_RATE, "Euro"]
         }
-        rate = dict_curr[currency][0]
-        curr_name = dict_curr[currency][1]
+        rate, curr_name = dict_curr[currency]
 
         if Calculator.get_today_stats(self) < self.limit:
             additive = self.limit - Calculator.get_today_stats(self)
@@ -67,7 +59,7 @@ class CashCalculator(Calculator):
         elif Calculator.get_today_stats(self) == self.limit:
             return "Денег нет, держись"
 
-        elif Calculator.get_today_stats(self) > self.limit:
+        else:
             debt = Calculator.get_today_stats(self) - self.limit
             debt__r = round(debt / rate, 2)
             return f"Денег нет, держись: твой долг - {debt__r} {curr_name}"
