@@ -49,20 +49,24 @@ class CashCalculator(Calculator):
             "usd": [self.USD_RATE, "USD"],
             "eur": [self.EURO_RATE, "Euro"]
         }
-        rate, curr_name = dict_curr[currency]
 
-        if Calculator.get_today_stats(self) < self.limit:
-            additive = self.limit - Calculator.get_today_stats(self)
-            additive_r = round(additive / rate, 2)
-            return f"На сегодня осталось {additive_r} {curr_name}"
+        if currency in dict_curr.keys():
+            rate, curr_name = dict_curr[currency]
 
-        elif Calculator.get_today_stats(self) == self.limit:
-            return "Денег нет, держись"
+            if Calculator.get_today_stats(self) < self.limit:
+                additive = self.limit - Calculator.get_today_stats(self)
+                additive_r = round(additive / rate, 2)
+                return f"На сегодня осталось {additive_r} {curr_name}"
 
+            elif Calculator.get_today_stats(self) == self.limit:
+                return "Денег нет, держись"
+
+            else:
+                debt = Calculator.get_today_stats(self) - self.limit
+                debt__r = round(debt / rate, 2)
+                return f"Денег нет, держись: твой долг - {debt__r} {curr_name}"
         else:
-            debt = Calculator.get_today_stats(self) - self.limit
-            debt__r = round(debt / rate, 2)
-            return f"Денег нет, держись: твой долг - {debt__r} {curr_name}"
+            return f"No data for {currency} currency"
 
 
 class Record:
